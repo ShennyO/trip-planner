@@ -32,7 +32,7 @@ class TripPlannerTestCase(unittest.TestCase):
         self.app.post(
             '/users',
             data=json.dumps(dict(
-            username="Ouyeezy",
+            username="Ouyeezyy",
             password="test",
             email="sunnyouyang.ehs@gmail.com",
             id="51011123"
@@ -46,9 +46,11 @@ class TripPlannerTestCase(unittest.TestCase):
         )
 
 
-        response_json = json.loads(response.data.decode())
-
         self.assertEqual(response.status_code, 200)
+
+
+
+
 
     def testUserParam(self):
 
@@ -56,13 +58,14 @@ class TripPlannerTestCase(unittest.TestCase):
             '/users',
             data=json.dumps(dict(
             username="Shenny",
-            password="test"
+            password="testzzz"
 
             )), content_type = 'application/json'
 
         )
 
-        response_json = json.loads(response.data.decode())
+
+        print("IT WORKED")
 
         self.assertEqual(response.status_code, 400)
 
@@ -74,23 +77,66 @@ class TripPlannerTestCase(unittest.TestCase):
         #to test the patch, I want to see if the parameters I changed is equal
         #to the client's post request.
 
+        changed_username="BlackOuyeezy"
+
         self.app.post(
             '/users',
             data=json.dumps(dict(
-            username="Ouyeezy",
+            username="BOuyeezy",
+            password="test",
+            email="sunnyouyangs.ehs@gmail.com",
+            id="51011123"
+            )), content_type='application/json'
+        )
+
+
+        #the patch is going to take both a query string, for the request arguments and also take data thats from our body
+        response = self.app.patch(
+            '/users',
+            query_string=dict(email="sunnyouyangs.ehs@gmail.com"),
+            data=json.dumps(dict(
+            username="BlackOuyeezy",
             password="test",
             email="sunnyouyang.ehs@gmail.com",
             id="51011123"
             )), content_type='application/json'
         )
 
+        self.assertEqual(response.status_code, 200)
 
-        user_obj = self.app.get(
-        '/users',
-        query_string=dict(email="sunnyouyang.ehs@gmail.com")
+    def test_invalid_get(self):
+        print("HEYO")
+        self.app.post(
+            '/users',
+            data=json.dumps(dict(
+            username="Ouyeezyy",
+            password="test",
+            email="sunnyouyang.ehs@gmail.com",
+            id="51011123"
+            )), content_type='application/json'
         )
 
-        self.app.patch
+        response = self.app.get(
+        '/users',
+        query_string=dict(email="sunnyouyangs.ehs@gmail.com")
+        )
+
+        self.assertEqual(response.status_code, 400)
+
+    def test_nonexistent_patch(self):
+
+        response = self.app.patch(
+            '/users',
+            query_string=dict(email="sunnyouyangs.ehs@gmail.com"),
+            data=json.dumps(dict(
+            username="BlackOuyeezy",
+            password="test",
+            email="sunnyouyang.ehs@gmail.com",
+            id="51011123"
+            )), content_type='application/json'
+        )
+
+        self.assertEqual(response.status_code, 401)
 
 
 
