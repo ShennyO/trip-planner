@@ -15,11 +15,36 @@ class JSONEncoder(json.JSONEncoder):
 
 
 app = Flask(__name__)
+app.bcrypt_rounds = 12
 mongo = MongoClient('localhost', 27017)
 app.db = mongo.trip_planner_development
 app.bcrypt_rounds = 12
 api = Api(app)
 
+def validate_auth(email, password):
+    user_collection = app.db.users
+    user = user_collection.find_one({'email': email})
+
+    if user is None:
+        return False
+    else:
+        # check if the hash we generate based on auth matches stored hash
+        encodedPassword = password.encode('utf-8')
+        if bcrypt.hashpw(encodedPassword, user['password']) == user['password']:
+            return True
+        else:
+            return False
+
+def authenticated_request(func):
+    def wrapper(*args, **kwargs):
+        auth = request.authorization
+
+        if not auth or not validate_auth(auth.username, auth.password):
+            return ({'error': 'Basic Auth Required.'}, 401, None)
+
+        return func(*args, **kwargs)
+
+    return wrapper
 
 
 
@@ -28,6 +53,7 @@ api = Api(app)
 
 class Trip(Resource):
 
+    @authenticated_request
     def get(self):
         #now that I set up my trips collection in MongoDB, I can start working on the functions
         trips_collection = app.db.trips
@@ -45,13 +71,13 @@ class Trip(Resource):
         return (json_invalid_msg, 400, None)
 
 
-
+    @authenticated_request
     def post(self):
         trips_collection = app.db.trips
         #I want them to have the email set, destination, and a start date
         #waypoints can be empty, completed set to false, end-date can be empty.
         trip = request.json
-        if 'email' in trip and if 'destination' in trip and if 'start_date' in trip and if 'end_date' in trip and if 'waypoints' in trip and if 'completed' in trip:
+        if 'email' in trip and 'destination' in trip and 'start_date' in trip and 'end_date' in trip and 'waypoints' in trip and 'completed' in trip:
 
             if trip['waypoints'] is None:
                 trip['waypoints'] = []
@@ -60,7 +86,7 @@ class Trip(Resource):
             result = trips_collection.insert_one(trip)
 
             trip_object = trips_collection.find_one({"_id": ObjectId(result.inserted_id)})
-            return (user_object, 200, None)
+            return (trip_object, 200, None)
 
         error_dict = {'error': 'Missing Parameters'}
 
@@ -68,21 +94,33 @@ class Trip(Resource):
         return (error_dict, 400, None)
 
 
-
+    @authenticated_request
     def patch(self):
         #get request to get the trip object, by the name and by the email
         trips_collection = app.db.trips
-        if 'destination' in request.args and if 'email' in request.args:
+        if 'destination' in request.args and 'email' in request.args:
             selected_trip = trips_collection.find_one({'destination': request.args['destination'], 'email': request.args['email']})
             trip = request.json
 
-             if 'destination' in trip or if 'start_date' in trip or if 'end_date' in trip or if 'waypoints' in trip or if 'completed' in trip:
-                if trip['destination'] !is None:
+            if 'destination' in trip:
+                if trip['destination'] != None:
                     trips_collection.update_one({'email': request.args['email'], 'destination': request.args['destination']}, {'$set' : {'destination': trip['destination']}})
-                if trip['completed'] != None:
-                    trips_collection.update_one({'email': request.args['email'], 'destination': request.args['destination']}, {'$set': {'completed': trip['completed']}})
+                    return ({"success": "You have successfully updated " + str(trips_collection.find_one({'destination': request.args['destination'], 'email': request.args['email']}))}, 200, None)
+
+
+            if 'waypoints' in trip:
                 if trip['waypoints'] != None:
                     trips_collection.update_one({'email': request.args['email'], 'destination': request.args['destination']}, {'$set': {'waypoints': trip['waypoints']}})
+                    return ({"success": "You have successfully updated " + str(trips_collection.find_one({'destination': request.args['destination'], 'email': request.args['email']}))}, 200, None)
+
+
+
+            if 'completed' in trip:
+                if trip['completed'] != None:
+                    trips_collection.update_one({'email': request.args['email'], 'destination': request.args['destination']}, {'$set': {'completed': trip['completed']}})
+                    return ({"success": "You have successfully updated " + str(trips_collection.find_one({'destination': request.args['destination'], 'email': request.args['email']}))}, 200, None)
+
+
 
             error_dict = {'error': 'invalid patch request, missing body'}
             return (error_dict, 400, None)
@@ -90,15 +128,15 @@ class Trip(Resource):
         error_dict = {'error': 'Missing url parameters'}
         return (error_dict, 400, None)
 
-
+    @authenticated_request
     def delete(self):
         trips_collection = app.db.trips
-        if 'destination' in request.args and if 'email' in request.args:
+        if 'destination' in request.args and 'email' in request.args:
 
-            selected_trip = trips_collection.find_one({'destination': request.args['destination', 'email': request.args['email']]})
+            selected_trip = trips_collection.find_one({'destination': request.args['destination'], 'email': request.args['email']})
             if selected_trip != None:
-                result = trips_collection.delete_one({'destination': request.args['destination', 'email': request.args['email']]})
-            return ('You just deleted your' + selected_trip + ' trip', 200, None )
+                result = trips_collection.delete_one({'destination': request.args['destination'], 'email': request.args['email']})
+            return ('You just deleted your' + str(selected_trip) + ' trip', 200, None )
 
 
 
@@ -116,8 +154,9 @@ class User(Resource):
             not_found_msg = {'error': 'Name not found'}
             json_not_found = json.dumps(not_found_msg)
             return (json_not_found, 401, None)
-        users_collection.update_one({'email': searched_email}, { "$set" : {'username': name_result['username']} })
+        result = users_collection.update_one({'email': searched_email}, { "$set" : {'username': name_result['username']} })
         # json_searched_obj = JSONEncoder().encode(searched_obj)
+        searched_obj.pop('password')
         return (searched_obj, 200, None)
 
     def post(self):
@@ -129,10 +168,21 @@ class User(Resource):
 
 
       if ('username' in new_user and 'password' in new_user and 'email' in new_user and 'id' in new_user):
-          print ("the post request worked")
+          password = new_user['password']
+          encodedPassword = password.encode('utf-8')
+
+          hashed = bcrypt.hashpw(
+          encodedPassword, bcrypt.gensalt(app.bcrypt_rounds)
+          )
+          new_user['password'] = encodedPassword
+
+          #After inserting an obj into the database, it returns to us the object ID
+          #So we use the id in our find_one function only after it has been posted
+          #Regularly, how would we be able to find a user based off of it's id?
           result = users_collection.insert_one(new_user)
           print ("the result is: " + str(result))
           user_object = users_collection.find_one({"_id": ObjectId(result.inserted_id)})
+          user_object.pop('password')
           return (user_object, 200, None)
 
       error_dict = {'error': 'Missing Parameters'}
@@ -145,18 +195,40 @@ class User(Resource):
     def get(self):
       #getting the collection
       users_collection = app.db.users
-      #getting the user's username from url parameters
-      if 'email' in request.args:
-          user_email = request.args['email']
 
+      #getting the user's username from url parameters
+      if 'email' in request.args and 'password' in request.args:
+          user_email = request.args['email']
+          user_password = request.args['password']
+
+          #result is the user_obj from our database
           result = users_collection.find_one({'email': user_email})
           if result is None:
 
              not_found_msg = {'error': 'user not found'}
              json_not_found = json.dumps(not_found_msg)
              return (json_not_found, 400, None)
-        #   response_json = JSONEncoder().encode(result)
-          return (result, 200, None)
+
+          #The jsonPassword is the password that was entered in the parameter of this GET request.
+
+          encodedPassword = user_password.encode('utf-8')
+
+          if bcrypt.hashpw(encodedPassword, result['password']) == result['password']:
+              result.pop('password')
+              return (result, 200, None)
+
+          else:
+              error_dict = {'error': 'Invalid login information'}
+
+
+              return (error_dict, 400, None)
+
+
+
+
+
+
+
 
       invalid_parameters_msg = {'error': 'invalid search request'}
       json_invalid_msg = json.dumps(invalid_parameters_msg)
@@ -173,7 +245,7 @@ class User(Resource):
             selected_trip = trips_collection.find({'email': request.args['email']})
             #if there are none, then we can delete the user
             selected_user = users_collection.find_one({'email': request.args['email']})
-            
+
 
             if selected_trip is None:
                 users_collection.delete_one({'email': request.args['email']})

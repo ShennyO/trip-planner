@@ -8,6 +8,11 @@ import pdb
 
 
 class TripPlannerTestCase(unittest.TestCase):
+
+    # def generateBasicAuth(username, password):
+        
+
+
     def setUp(self):
 
       self.app = server.app.test_client()
@@ -69,7 +74,7 @@ class TripPlannerTestCase(unittest.TestCase):
 
         self.assertEqual(response.status_code, 400)
 
-    def testPatch(self):
+    def testPatchUser(self):
 
 
         #to do the Patch, I get the user with a get request with the user's email in the URL parameters
@@ -104,8 +109,8 @@ class TripPlannerTestCase(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-    def test_invalid_get(self):
-        print("HEYO")
+    def test_invalid_get_user(self):
+
         self.app.post(
             '/users',
             data=json.dumps(dict(
@@ -123,7 +128,7 @@ class TripPlannerTestCase(unittest.TestCase):
 
         self.assertEqual(response.status_code, 400)
 
-    def test_nonexistent_patch(self):
+    def test_nonexistent_patch_user(self):
 
         response = self.app.patch(
             '/users',
@@ -137,6 +142,142 @@ class TripPlannerTestCase(unittest.TestCase):
         )
 
         self.assertEqual(response.status_code, 401)
+
+    # def test_delete_user(self):
+
+
+
+    def test_create_trips(self):
+        #in this func we want to test if we get back the selected trip correctly
+        #able to test both the post and get at once
+
+        self.app.post(
+            '/trips',
+            data=json.dumps(dict(
+            destination="foshan",
+            start_date="Start date",
+            end_date="end date",
+            completed=False,
+            waypoints=[{
+            'name': 'LamHoi',
+            'lat': 23.0,
+            'long': 40.0
+            }],
+            email="sunnyouyang.ehs@gmail.com"
+            )), content_type='application/json'
+        )
+
+
+        response = self.app.get(
+        '/trips',
+        query_string=dict(email="sunnyouyang.ehs@gmail.com", destination="foshan")
+        )
+
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_trip_patch(self):
+        #in here we test if we can correctly update a value of one of our trips
+        self.app.post(
+            '/trips',
+            data=json.dumps(dict(
+            destination="foshan",
+            start_date="Start date",
+            end_date="end date",
+            completed=False,
+            waypoints=[],
+            email="sunnyouyang.ehs@gmail.com"
+            )), content_type='application/json'
+        )
+
+        response = self.app.patch(
+        '/trips',
+        query_string=dict(email="sunnyouyangs.ehs@gmail.com", destination="foshan"),
+        data=json.dumps(dict(
+        completed=True,
+        waypoints=[{'name': 'LamHoi', 'lat': 32.0, 'long': 5.0}]
+        )), content_type='application/json'
+
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+    def test_trip_delete(self):
+        #here we check if we can correctly delete a trip from the trips collection
+
+        self.app.post(
+            '/trips',
+            data=json.dumps(dict(
+            destination="foshan",
+            start_date="Start date",
+            end_date="end date",
+            completed=False,
+            waypoints=[],
+            email="sunnyouyang.ehs@gmail.com"
+            )), content_type='application/json'
+        )
+
+        response = self.app.delete(
+        '/trips',
+        query_string=dict(email="sunnyouyang.ehs@gmail.com", destination="foshan")
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_invalid_trip_get(self):
+        #Here we'll purposely enter in the wrong parameter to see if the error hits
+
+        self.app.post(
+            '/trips',
+            data=json.dumps(dict(
+            destination="foshan",
+            start_date="Start date",
+            end_date="end date",
+            completed=False,
+            waypoints=[{
+            'name': 'LamHoi',
+            'lat': 23.0,
+            'long': 40.0
+            }],
+            email="sunnyouyang.ehs@gmail.com"
+            )), content_type='application/json'
+        )
+
+
+        response = self.app.get(
+        '/trips',
+        query_string=dict(email="sunnyouyangs.ehs@gmail.com", destination="foshans")
+        )
+
+        self.assertEqual(response.status_code, 400, None)
+
+
+
+    def test_invalid_trip_post(self):
+        #check to see if we enter invalid body for post request
+        result = self.app.post(
+            '/trips',
+            data=json.dumps(dict(
+            destination="foshan",
+            start_date="Start date",
+            endd_date="end date",
+            completed=False,
+            waypoints=[{
+            'name': 'LamHoi',
+            'lat': 23.0,
+            'long': 40.0
+            }],
+            email="sunnyouyang.ehs@gmail.com"
+            )), content_type='application/json'
+        )
+
+        self.assertEqual(result.status_code, 400, None)
+
+    #
+    # def test_nonexistent_patch_trip(self):
+    #     #check to see if we can patch when there's nothing to patch
+    #
+    # def test_invalid_trip_delete(self):
+    #     #check what happens when we run an invalid delete request
 
 
 
