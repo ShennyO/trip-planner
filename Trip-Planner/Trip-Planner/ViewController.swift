@@ -25,6 +25,21 @@ class ViewController: UIViewController {
     //In here we'll handle the POST request for creating a new user. So we'll get the username and password from the textfield and then send the POST request to our server. The password gets hashed 
     
     @IBAction func signUpTapped(_ sender: Any) {
+        
+        guard let email = emailTextField.text else {return}
+        guard let password = passwordTextField.text else {return}
+        
+        let basicToken = BasicAuth.generateBasicAuthHeader(username: email, password: password)
+        
+        Network.instance.fetch(route: Route.post_user(email: email, password: password), token: basicToken) { (data) in
+            print(data)
+//            
+//            let json = try JSONSerialization.jsonObject(with: data, options: .allowFragments)
+//            print(json)
+            
+            print("Created User")
+        }
+        
     }
     
     //When the login button is tapped, we want to send a GET request. First we have to turn the email and password into a token, and pass them off in the authorization header of the request.
@@ -56,10 +71,10 @@ class ViewController: UIViewController {
         Network.instance.fetch(route: Route.get_user, token: basicToken) { (data) in
             
             
-            
+            //we decoded the data from the GET request
             let jsonUser = try? JSONDecoder().decode(User.self, from: data)
             
-            let json = try? JSONSerialization.jsonObject(with: data, options: .allowFragments)
+           
             
             if let user = jsonUser {
                

@@ -61,6 +61,7 @@ enum Route {
     func body() -> [String: String] {
         switch self {
          case let .post_user(email,password):
+            
             return [
                 "email": email,
                 "password": password
@@ -98,7 +99,11 @@ class Network {
         var request = URLRequest(url: pathURL!)
         request.httpMethod = route.method()
         request.allHTTPHeaderFields = route.headers(authorization: token)
-//        request.httpBody
+        var body = route.body()
+        let encoder = JSONEncoder()
+        
+        let result = try? encoder.encode(body)
+        request.httpBody = result
         
         session.dataTask(with: request) { (data, resp, err) in
             print(String(describing: data) + String(describing: resp) + String(describing: err))
