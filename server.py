@@ -3,9 +3,12 @@ from flask_restful import Resource, Api
 from pymongo import MongoClient
 # from utils.mongo_json_encoder import JSONEncoder
 from bson.objectid import ObjectId
+from bson.json_util import dumps
 import bcrypt
 import json
 import pdb
+
+
 
 class JSONEncoder(json.JSONEncoder):
     def default(self, o):
@@ -23,6 +26,7 @@ api = Api(app)
 
 def validate_auth(email, password):
     user_collection = app.db.users
+    # pdb.set_trace()
     user = user_collection.find_one({'email': email})
 
     if user is None:
@@ -30,6 +34,7 @@ def validate_auth(email, password):
     else:
         # check if the hash we generate based on auth matches stored hash
         encodedPassword = password.encode('utf-8')
+        # pdb.set_trace()
         if bcrypt.hashpw(encodedPassword, user['password']) == user['password']:
             return True
         else:
@@ -38,6 +43,7 @@ def validate_auth(email, password):
 def authenticated_request(func):
     def wrapper(*args, **kwargs):
         auth = request.authorization
+
 
         if not auth or not validate_auth(auth.username, auth.password):
             return ({'error': 'Basic Auth Required.'}, 401, None)
@@ -53,22 +59,28 @@ def authenticated_request(func):
 
 class Trip(Resource):
 
+    # pdb.set_trace()
     @authenticated_request
     def get(self):
+        # pdb.set_trace()
         #now that I set up my trips collection in MongoDB, I can start working on the functions
         trips_collection = app.db.trips
-        if 'email' in request.args:
-            trip = request.args['email']
-            result_trip = trips_collection.find_one({'email': trip})
-            if result_trip is None:
-                not_found_msg = {'error': 'user not found'}
-                json_not_found = json.dumps(not_found_msg)
-                return (json_not_found, 400, None)
-            return (result_trip, 200, None)
+        auth = request.authorization
+        trip = auth.username
+        result_count = trips_collection.count({'email': trip})
 
-        invalid_parameters_msg = {'error': 'invalid search request'}
-        json_invalid_msg = json.dumps(invalid_parameters_msg)
-        return (json_invalid_msg, 400, None)
+        result_trips = list(trips_collection.find({'email': trip}))
+        print(result_trips)
+        if result_trips is None:
+            not_found_msg = {'error': 'user not found'}
+            json_not_found = json.dumps(not_found_msg)
+            return (json_not_found, 400, None)
+        # encoded_trips = dumps(result_trips)
+
+        trips = json.loads(dumps(result_trips))
+        return (trips, 200, None)
+
+
 
 
     @authenticated_request
@@ -160,21 +172,22 @@ class User(Resource):
         return (searched_obj, 200, None)
 
     def post(self):
-
+      #in our client, we're going to have to send the required information through the body
+      #We need a body function in the client
       new_user = request.json
       print ("the new user object is: " + str(new_user))
 
       users_collection = app.db.users
 
 
-      if ('username' in new_user and 'password' in new_user and 'email' in new_user and 'id' in new_user):
+      if ('username' in new_user and 'password' in new_user and 'email' in new_user):
           password = new_user['password']
           encodedPassword = password.encode('utf-8')
 
           hashed = bcrypt.hashpw(
           encodedPassword, bcrypt.gensalt(app.bcrypt_rounds)
           )
-          new_user['password'] = encodedPassword
+          new_user['password'] = hashed
 
           #After inserting an obj into the database, it returns to us the object ID
           #So we use the id in our find_one function only after it has been posted
@@ -185,54 +198,63 @@ class User(Resource):
           user_object.pop('password')
           return (user_object, 200, None)
 
-      error_dict = {'error': 'Missing Parameters'}
+      error_dict = {'error': 'Missing Parameters haha'}
 
 
       return (error_dict, 400, None)
 
 
-
+    @authenticated_request
     def get(self):
       #getting the collection
+
       users_collection = app.db.users
+      auth = request.authorization
+
+      users_email = auth.username
+      print(users_email)
+      users_password = auth.password
 
       #getting the user's username from url parameters
-      if 'email' in request.args and 'password' in request.args:
-          user_email = request.args['email']
-          user_password = request.args['password']
+
+    #   if 'email' in request.args:
+    #       user_email = request.args['email']
+    #       print(request.args['password'])
+    #       user_password = request.args['password']
 
           #result is the user_obj from our database
-          result = users_collection.find_one({'email': user_email})
-          if result is None:
+      result = users_collection.find_one({'email': users_email})
 
-             not_found_msg = {'error': 'user not found'}
-             json_not_found = json.dumps(not_found_msg)
-             return (json_not_found, 400, None)
+      if result is None:
+
+         not_found_msg = {'error': 'user not found'}
+         json_not_found = json.dumps(not_found_msg)
+         return (json_not_found, 402, None)
 
           #The jsonPassword is the password that was entered in the parameter of this GET request.
 
-          encodedPassword = user_password.encode('utf-8')
-
-          if bcrypt.hashpw(encodedPassword, result['password']) == result['password']:
-              result.pop('password')
-              return (result, 200, None)
-
-          else:
-              error_dict = {'error': 'Invalid login information'}
 
 
-              return (error_dict, 400, None)
+      result.pop('password')
+      return (result, 200, None)
 
 
 
+    #   if bcrypt.checkpw(encoded_password, result['password']):
+      #
+    #
+      #
+    #   else:
+    #       error_dict = {'error': 'Invalid login information'}
+    #       return (error_dict, 400, None)
 
 
 
 
 
-      invalid_parameters_msg = {'error': 'invalid search request'}
-      json_invalid_msg = json.dumps(invalid_parameters_msg)
-      return (json_invalid_msg, 400, None)
+    #   invalid_parameters_msg = {'error': 'invalid search request'}
+    #   json_invalid_msg = json.dumps(invalid_parameters_msg)
+    #   return (json_invalid_msg, 400, None)
 
     def delete(self):
         #in here we want to delete the user, but we only want to delete the user if we can delete the trips along with it

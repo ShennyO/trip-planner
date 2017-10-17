@@ -16,6 +16,10 @@
 		8407DD011F9300300036331B /* Trip_PlannerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8407DD001F9300300036331B /* Trip_PlannerUITests.swift */; };
 		8407DD0F1F9314FF0036331B /* AuthHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8407DD0E1F9314FF0036331B /* AuthHelper.swift */; };
 		8407DD111F9327DD0036331B /* TripsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8407DD101F9327DD0036331B /* TripsViewController.swift */; };
+		8407DD131F9329BC0036331B /* tripsTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8407DD121F9329BC0036331B /* tripsTableViewCell.swift */; };
+		8407DD151F93EB300036331B /* Networking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8407DD141F93EB300036331B /* Networking.swift */; };
+		8407DD171F94314F0036331B /* trips.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8407DD161F94314F0036331B /* trips.swift */; };
+		8407DD191F947DED0036331B /* user.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8407DD181F947DED0036331B /* user.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -51,6 +55,10 @@
 		8407DD021F9300300036331B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8407DD0E1F9314FF0036331B /* AuthHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthHelper.swift; sourceTree = "<group>"; };
 		8407DD101F9327DD0036331B /* TripsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripsViewController.swift; sourceTree = "<group>"; };
+		8407DD121F9329BC0036331B /* tripsTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = tripsTableViewCell.swift; sourceTree = "<group>"; };
+		8407DD141F93EB300036331B /* Networking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Networking.swift; sourceTree = "<group>"; };
+		8407DD161F94314F0036331B /* trips.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = trips.swift; sourceTree = "<group>"; };
+		8407DD181F947DED0036331B /* user.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = user.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,7 +112,11 @@
 				8407DCE01F9300300036331B /* AppDelegate.swift */,
 				8407DCE21F9300300036331B /* ViewController.swift */,
 				8407DD101F9327DD0036331B /* TripsViewController.swift */,
+				8407DD161F94314F0036331B /* trips.swift */,
+				8407DD181F947DED0036331B /* user.swift */,
+				8407DD121F9329BC0036331B /* tripsTableViewCell.swift */,
 				8407DD0E1F9314FF0036331B /* AuthHelper.swift */,
+				8407DD141F93EB300036331B /* Networking.swift */,
 				8407DCE41F9300300036331B /* Main.storyboard */,
 				8407DCE71F9300300036331B /* Assets.xcassets */,
 				8407DCE91F9300300036331B /* LaunchScreen.storyboard */,
@@ -267,6 +279,10 @@
 			files = (
 				8407DCE31F9300300036331B /* ViewController.swift in Sources */,
 				8407DD111F9327DD0036331B /* TripsViewController.swift in Sources */,
+				8407DD131F9329BC0036331B /* tripsTableViewCell.swift in Sources */,
+				8407DD151F93EB300036331B /* Networking.swift in Sources */,
+				8407DD191F947DED0036331B /* user.swift in Sources */,
+				8407DD171F94314F0036331B /* trips.swift in Sources */,
 				8407DCE11F9300300036331B /* AppDelegate.swift in Sources */,
 				8407DD0F1F9314FF0036331B /* AuthHelper.swift in Sources */,
 			);
