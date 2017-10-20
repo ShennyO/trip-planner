@@ -26,7 +26,7 @@ enum Route {
     case get_user
     case patch_user
     case delete_user
-    case post_trip
+    case post_trip(email: String, destination: String, startDate: String, endDate: String, waypoints: Any, completed: Bool)
     case get_trip
     case patch_trip
     case delete_trip
@@ -58,16 +58,37 @@ enum Route {
         }
     }
     //in this body we have to return the dictionary we want to create
-    func body() -> [String: String] {
+    func body() -> Data? {
         switch self {
          case let .post_user(email,password):
             
-            return [
-                "email": email,
-                "password": password
-            ]
+           let user = User(username: email, email: email)
+           
+           let encoder = JSONEncoder()
+           
+           let result = try? encoder.encode(user)
+           
+            
+           return result!
+            
+//            return [
+//                "email": email,
+//                "password": password
+//            ]
+        
+        case let .post_trip(email, destination, startDate, endDate, waypoints, completed):
+            
+            
+            let trip = UserTrip(email: email, destination: destination, startDate: startDate, endDate: endDate, waypoints: [], completed: true)
+            
+             let encoder = JSONEncoder()
+            
+             let result = try? encoder.encode(trip)
+            
+            return result
+        
         default:
-            return [:]
+            return nil
         }
     }
     
@@ -86,7 +107,7 @@ enum Route {
 class Network {
     static let instance = Network()
     
-    let baseURL = "http://127.0.0.1:5000/"
+    let baseURL = "http://127.0.0.1:8000/"
     let session = URLSession.shared
     
     func fetch(route: Route, token: String, completion: @escaping (Data) -> Void) {
@@ -100,10 +121,10 @@ class Network {
         request.httpMethod = route.method()
         request.allHTTPHeaderFields = route.headers(authorization: token)
         var body = route.body()
-        let encoder = JSONEncoder()
         
-        let result = try? encoder.encode(body)
-        request.httpBody = result
+        
+       
+        request.httpBody = route.body()
         
         session.dataTask(with: request) { (data, resp, err) in
             print(String(describing: data) + String(describing: resp) + String(describing: err))

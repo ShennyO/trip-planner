@@ -9,7 +9,31 @@
 import UIKit
 
 class newTripViewController: UIViewController {
+    
+    var loggedUser: User?
+    
+    var password: String?
 
+    @IBOutlet weak var destinationTextField: UITextField!
+    
+    @IBOutlet weak var startDateTextField: UITextField!
+    
+    @IBOutlet weak var endDateTextField: UITextField!
+    
+    @IBOutlet weak var completedSwitch: UISwitch!
+    
+    //In here, we make a post request for a new trip and we pass in the required fields in the body of the request. 
+    @IBAction func addButton(_ sender: Any) {
+        
+        let token = BasicAuth.generateBasicAuthHeader(username: ((self.loggedUser?.email))!, password: self.password!)
+        
+        Network.instance.fetch(route: Route.post_trip(email: (self.loggedUser?.email)!, destination: destinationTextField.text!, startDate: startDateTextField.text!, endDate: endDateTextField.text!, waypoints: [], completed: completedSwitch.isOn), token: token) { (data) in
+            print("Created New Trip")
+        }
+        
+    }
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -22,14 +46,5 @@ class newTripViewController: UIViewController {
     }
     
 
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
+   
 }

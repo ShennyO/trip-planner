@@ -11,7 +11,7 @@ import UIKit
 
 
 //this is the model we're trying to convert our data to
-struct User {
+struct User: Codable {
     var username: String
 //    var password: String
     var email: String
@@ -20,12 +20,18 @@ struct User {
 
 //this is allowing the data to be decoded back to our User model 
 
-extension User: Decodable {
+extension User {
     
     enum userKeys: String, CodingKey {
         case username
 //        case password
         case email
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var value = encoder.container(keyedBy: userKeys.self)
+        try value.encode(email, forKey: .email)
+        try value.encode(username, forKey: .username)
     }
     
     

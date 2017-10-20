@@ -20,6 +20,7 @@
 		8407DD151F93EB300036331B /* Networking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8407DD141F93EB300036331B /* Networking.swift */; };
 		8407DD171F94314F0036331B /* trips.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8407DD161F94314F0036331B /* trips.swift */; };
 		8407DD191F947DED0036331B /* user.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8407DD181F947DED0036331B /* user.swift */; };
+		846241111F980255000F1D1D /* newTripViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846241101F980255000F1D1D /* newTripViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -59,6 +60,7 @@
 		8407DD141F93EB300036331B /* Networking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Networking.swift; sourceTree = "<group>"; };
 		8407DD161F94314F0036331B /* trips.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = trips.swift; sourceTree = "<group>"; };
 		8407DD181F947DED0036331B /* user.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = user.swift; sourceTree = "<group>"; };
+		846241101F980255000F1D1D /* newTripViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = newTripViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -112,6 +114,7 @@
 				8407DCE01F9300300036331B /* AppDelegate.swift */,
 				8407DCE21F9300300036331B /* ViewController.swift */,
 				8407DD101F9327DD0036331B /* TripsViewController.swift */,
+				846241101F980255000F1D1D /* newTripViewController.swift */,
 				8407DD161F94314F0036331B /* trips.swift */,
 				8407DD181F947DED0036331B /* user.swift */,
 				8407DD121F9329BC0036331B /* tripsTableViewCell.swift */,
@@ -284,6 +287,7 @@
 				8407DD191F947DED0036331B /* user.swift in Sources */,
 				8407DD171F94314F0036331B /* trips.swift in Sources */,
 				8407DCE11F9300300036331B /* AppDelegate.swift in Sources */,
+				846241111F980255000F1D1D /* newTripViewController.swift in Sources */,
 				8407DD0F1F9314FF0036331B /* AuthHelper.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

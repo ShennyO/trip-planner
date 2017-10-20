@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-struct UserTrip {
+struct UserTrip: Codable {
     var destination: String
     var startDate: String
     var endDate: String
@@ -29,7 +29,7 @@ struct UserTrip {
     
 }
 
-extension UserTrip: Decodable {
+extension UserTrip {
     
     enum CodingKeys: String, CodingKey {
 
